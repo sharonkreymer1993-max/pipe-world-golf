@@ -1,5 +1,6 @@
 "use strict";
 /* ---------- drawing ---------- */
+const BALL_DIMPLES=[[-4,-2],[2,-4],[5,1],[-1,4],[-5,3],[3,5],[0,-6]];
 function rr(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r);}
 function draw(){
   // grass
@@ -72,12 +73,7 @@ function draw(){
     }
   }
   // ball
-  if(!sunk){
-    ctx.beginPath();ctx.arc(ball.x+3,ball.y+4,BR,0,7);ctx.fillStyle="rgba(0,0,0,.25)";ctx.fill();
-    ctx.beginPath();ctx.arc(ball.x,ball.y,BR,0,7);ctx.fillStyle="#fff";ctx.fill();
-    ctx.strokeStyle="#c9c9c9";ctx.lineWidth=2;ctx.stroke();
-    ctx.beginPath();ctx.arc(ball.x-3,ball.y-3,3.5,0,7);ctx.fillStyle="rgba(255,255,255,.9)";ctx.fill();
-  }
+  if(!sunk)drawBall();
   // particles
   for(const p of particles){
     ctx.globalAlpha=p.life;ctx.fillStyle=p.color;
@@ -87,10 +83,23 @@ function draw(){
 }
 function drawPipe(x,y){
   ctx.save();ctx.translate(x,y);
-  ctx.fillStyle="rgba(0,0,0,.55)";ctx.beginPath();ctx.ellipse(0,0,20,14,0,0,7);ctx.fill();
-  ctx.fillStyle="#2fa53a";rr(-26,-16,52,14,7);ctx.fill();
+  // ground shadow
+  ctx.beginPath();ctx.ellipse(2,4,22,15,0,0,7);
+  ctx.fillStyle="rgba(0,0,0,.2)";ctx.shadowColor="rgba(0,0,0,.25)";ctx.shadowBlur=4;
+  ctx.fill();ctx.shadowBlur=0;
+  // dark hole with radial depth
+  const holeG=ctx.createRadialGradient(0,2,2,0,0,20);
+  holeG.addColorStop(0,"#0a1f0a");holeG.addColorStop(.7,"#132913");holeG.addColorStop(1,"rgba(0,0,0,.6)");
+  ctx.beginPath();ctx.ellipse(0,0,20,14,0,0,7);ctx.fillStyle=holeG;ctx.fill();
+  ctx.strokeStyle="rgba(255,255,255,.15)";ctx.lineWidth=1.5;ctx.stroke();
+  // collar with metallic gradient
+  const rimG=ctx.createLinearGradient(0,-16,0,-2);
+  rimG.addColorStop(0,"#57d666");rimG.addColorStop(.45,"#2fa53a");rimG.addColorStop(1,"#1f7a29");
+  ctx.fillStyle=rimG;rr(-26,-16,52,14,7);ctx.fill();
   ctx.strokeStyle="#0e5c18";ctx.lineWidth=3;ctx.stroke();
-  ctx.fillStyle="rgba(255,255,255,.35)";ctx.fillRect(-20,-14,10,10);
+  // sheen highlight
+  ctx.fillStyle="rgba(255,255,255,.4)";
+  rr(-20,-14,14,5,3);ctx.fill();
   ctx.restore();
 }
 function drawHole(){
@@ -112,21 +121,63 @@ function drawShroom(m){
   m.sq=Math.max(0,(m.sq||0)-.06);
   const sq=1-(m.sq||0)*.25;
   ctx.save();ctx.translate(m.x,m.y);ctx.scale(1+(m.sq||0)*.2,sq);
-  ctx.beginPath();ctx.arc(0,4,m.r,0,7);ctx.fillStyle="rgba(0,0,0,.2)";ctx.fill();
-  // stem face
-  ctx.fillStyle="#ffe9c9";rr(-m.r*.55,0,m.r*1.1,m.r*.8,8);ctx.fill();
-  // cap
+  // soft ground shadow
+  ctx.beginPath();ctx.ellipse(0,m.r*.5,m.r*.95,m.r*.32,0,0,7);
+  ctx.fillStyle="rgba(10,40,10,.25)";ctx.shadowColor="rgba(10,40,10,.3)";ctx.shadowBlur=5;
+  ctx.fill();ctx.shadowBlur=0;
+  // stem with soft gradient
+  const stemG=ctx.createLinearGradient(-m.r*.55,0,m.r*.55,0);
+  stemG.addColorStop(0,"#f3d9a8");stemG.addColorStop(.5,"#ffe9c9");stemG.addColorStop(1,"#e8c48f");
+  ctx.fillStyle=stemG;rr(-m.r*.55,0,m.r*1.1,m.r*.8,8);ctx.fill();
+  ctx.strokeStyle="rgba(150,110,60,.4)";ctx.lineWidth=1.5;ctx.stroke();
+  // cap with radial shading (light source upper-left)
+  const capG=ctx.createRadialGradient(-m.r*.3,-m.r*.5,m.r*.1,0,-m.r*.1,m.r*1.15);
+  capG.addColorStop(0,"#ff8c7a");capG.addColorStop(.45,"#ff5d5d");capG.addColorStop(1,"#c93030");
   ctx.beginPath();ctx.arc(0,0,m.r,Math.PI,0);ctx.closePath();
-  ctx.fillStyle="#ff5d5d";ctx.fill();ctx.strokeStyle="#b32626";ctx.lineWidth=3;ctx.stroke();
+  ctx.fillStyle=capG;ctx.fill();ctx.strokeStyle="#8f1f1f";ctx.lineWidth=2.5;ctx.stroke();
+  // rim shadow where cap meets stem
+  ctx.strokeStyle="rgba(80,20,20,.35)";ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(-m.r,0);ctx.lineTo(m.r,0);ctx.stroke();
+  // spots
   ctx.fillStyle="#fff";
   ctx.beginPath();ctx.arc(-m.r*.45,-m.r*.35,m.r*.2,0,7);ctx.fill();
   ctx.beginPath();ctx.arc(m.r*.4,-m.r*.3,m.r*.16,0,7);ctx.fill();
   ctx.beginPath();ctx.arc(0,-m.r*.65,m.r*.14,0,7);ctx.fill();
-  // eyes
+  // rosy cheeks
+  ctx.fillStyle="rgba(255,120,120,.35)";
+  ctx.beginPath();ctx.ellipse(-m.r*.42,m.r*.42,m.r*.14,m.r*.09,0,0,7);ctx.fill();
+  ctx.beginPath();ctx.ellipse(m.r*.42,m.r*.42,m.r*.14,m.r*.09,0,0,7);ctx.fill();
+  // eyes with tiny highlight
   ctx.fillStyle="#333";
   ctx.beginPath();ctx.arc(-5,m.r*.32,2.6,0,7);ctx.fill();
   ctx.beginPath();ctx.arc(5,m.r*.32,2.6,0,7);ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,.85)";
+  ctx.beginPath();ctx.arc(-5.8,m.r*.28,.8,0,7);ctx.fill();
+  ctx.beginPath();ctx.arc(4.2,m.r*.28,.8,0,7);ctx.fill();
   ctx.restore();
+}
+function drawBall(){
+  const x=ball.x,y=ball.y;
+  // soft blurred ground shadow
+  ctx.beginPath();ctx.ellipse(x,y+BR*.75,BR*1.05,BR*.5,0,0,7);
+  ctx.fillStyle="rgba(10,30,10,.3)";ctx.shadowColor="rgba(10,30,10,.35)";ctx.shadowBlur=6;
+  ctx.fill();ctx.shadowBlur=0;
+  // sphere shading (light source upper-left)
+  const grad=ctx.createRadialGradient(x-BR*.4,y-BR*.45,BR*.1,x,y,BR*1.1);
+  grad.addColorStop(0,"#ffffff");grad.addColorStop(.5,"#f4f4f4");
+  grad.addColorStop(.85,"#dcdcdc");grad.addColorStop(1,"#b9b9b9");
+  ctx.beginPath();ctx.arc(x,y,BR,0,7);ctx.fillStyle=grad;ctx.fill();
+  ctx.lineWidth=1.2;ctx.strokeStyle="rgba(110,110,110,.55)";ctx.stroke();
+  // dimple texture, clipped inside the sphere
+  ctx.save();
+  ctx.beginPath();ctx.arc(x,y,BR-1.5,0,7);ctx.clip();
+  ctx.fillStyle="rgba(0,0,0,.08)";
+  for(const[dx,dy] of BALL_DIMPLES){ctx.beginPath();ctx.arc(x+dx,y+dy,1,0,7);ctx.fill()}
+  ctx.restore();
+  // specular highlight
+  const hl=ctx.createRadialGradient(x-BR*.35,y-BR*.4,0,x-BR*.35,y-BR*.4,BR*.5);
+  hl.addColorStop(0,"rgba(255,255,255,.95)");hl.addColorStop(1,"rgba(255,255,255,0)");
+  ctx.beginPath();ctx.arc(x-BR*.35,y-BR*.4,BR*.5,0,7);ctx.fillStyle=hl;ctx.fill();
 }
 function drawCoin(c){
   c.ang+=.06;
