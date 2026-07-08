@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>גולף עולם הצינורות</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="wrap">
+  <canvas id="cv" width="960" height="600"></canvas>
+  <div id="hud">
+    <span class="chip" id="hLevel">שלב 1</span>
+    <span class="chip" id="hStrokes">חבטות: 0 / פאר 2</span>
+    <span class="chip" id="hCoins">🪙 0</span>
+    <span class="grow"></span>
+    <button id="bRetry">↺ שלב מחדש</button>
+    <button id="bMute">🔊</button>
+  </div>
+  <div id="overlay">
+    <div class="card" id="card">
+      <h1>⛳ גולף עולם הצינורות</h1>
+      <p>גררו מהכדור לאחור כמו רוגטקה, שחררו כדי לחבוט!</p>
+      <p>🟢 צינורות משגרים אתכם &nbsp;•&nbsp; 🍄 פטריות מקפיצות &nbsp;•&nbsp; 🪙 אספו מטבעות</p>
+      <p>💧 היזהרו מהמים ומהצבים המסתובבים!</p>
+      <div class="btn" id="bStart">התחל משחק!</div>
+    </div>
+  </div>
+</div>
+<script src="js/audio.js"></script>
+<script src="js/levels.js"></script>
+<script src="js/physics.js"></script>
+<script src="js/render.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

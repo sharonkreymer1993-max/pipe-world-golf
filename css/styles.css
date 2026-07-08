@@ -1,0 +1,49 @@
+:root{
+  --sky:#6ec9f5; --grass:#57b94c; --deep:#2f7d2a;
+  --pipe:#2fa53a; --coin:#ffd23f; --ink:#173b1f; --card:#fffef4;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:"Segoe UI",Arial,sans-serif;
+  background:linear-gradient(#4db3ec,#8fd8ff 60%,#bdeaff);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  touch-action:none;user-select:none;
+}
+#wrap{position:relative;width:min(96vw,calc(92vh*1.6));aspect-ratio:16/10}
+canvas{width:100%;height:100%;display:block;border-radius:18px;
+  box-shadow:0 14px 40px rgba(10,60,20,.35), inset 0 0 0 6px rgba(255,255,255,.25);
+  background:var(--grass);cursor:crosshair}
+#hud{
+  position:absolute;top:10px;right:14px;left:14px;display:flex;gap:8px;align-items:center;
+  pointer-events:none;font-weight:800;color:#fff;
+  text-shadow:0 2px 0 rgba(0,0,0,.35);font-size:clamp(12px,2vmin,18px)
+}
+.chip{background:rgba(15,70,25,.65);border:2px solid rgba(255,255,255,.5);
+  border-radius:999px;padding:4px 14px;backdrop-filter:blur(2px)}
+.grow{flex:1}
+#hud button{
+  pointer-events:auto;font:inherit;color:#fff;background:rgba(15,70,25,.65);
+  border:2px solid rgba(255,255,255,.6);border-radius:999px;padding:4px 14px;cursor:pointer
+}
+#hud button:active{transform:scale(.95)}
+#overlay{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(12,45,18,.45);border-radius:18px;backdrop-filter:blur(3px)
+}
+#overlay.hidden{display:none}
+.card{
+  background:var(--card);border:5px solid var(--ink);border-radius:22px;
+  padding:26px 34px;text-align:center;max-width:82%;
+  box-shadow:0 12px 0 rgba(0,0,0,.25);animation:pop .35s cubic-bezier(.2,1.6,.4,1)
+}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.card h1{color:var(--ink);font-size:clamp(22px,4.5vmin,40px);margin-bottom:6px}
+.card p{color:#3c5a41;font-size:clamp(13px,2.2vmin,18px);margin:6px 0}
+.stars{font-size:clamp(28px,6vmin,52px);letter-spacing:6px;margin:8px 0}
+.btn{
+  display:inline-block;margin-top:14px;font-size:clamp(15px,2.6vmin,22px);font-weight:800;
+  color:#fff;background:linear-gradient(#ff6b57,#e03e2d);border:4px solid var(--ink);
+  border-radius:14px;padding:10px 34px;cursor:pointer;box-shadow:0 6px 0 #8f1f13
+}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 #8f1f13}
