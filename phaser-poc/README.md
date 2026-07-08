@@ -19,20 +19,30 @@ npm run dev
   the mushroom bouncer, coins, and the hole are all Arcade static bodies
   with colliders/overlaps — no manual `circleRect`/`dist` math like the
   original `physics.js`.
-- **Sprites are placeholders**: every texture (`ball`, `hole`, `coin`,
-  `wall_N`, `mushroom_R`) is generated procedurally in `src/textures.js`
-  from flat-colored `Phaser.GameObjects.Graphics` shapes, not loaded image
-  files.
+- **Ball and mushroom are real art**: `public/assets/ball_golf.png` and
+  `ball_bowling2.png` from the Kenney Sports Pack, loaded in
+  `BootScene.preload()` and baked to the exact pixel size each sprite needs
+  (`src/textures.js`'s `bakeRealArtTextures`) so every consuming sprite is
+  created at GameObject scale 1 — Arcade body sizing
+  (`body.setCircle(radius)` in `Level1Scene`) works exactly like it did for
+  the vector-drawn placeholders, unaffected by the source images' native
+  pixel dimensions (8x8 and 18x18 respectively).
+- **Everything else is still a placeholder**: `hole`, `coin`, and `wall_N`
+  textures are generated procedurally in `src/textures.js`'s
+  `generatePlaceholderTextures` from flat-colored
+  `Phaser.GameObjects.Graphics` shapes, not loaded image files.
 
 ## Swapping in real art later
 
-`src/textures.js` is the single place placeholder textures are generated.
-To bring in real sprites:
+`src/textures.js` is the single place textures are produced. To bring in
+real sprites for what's still a placeholder (hole/coin/wall_N):
 
-1. Drop image files into a new `public/assets/` (or `src/assets/`) folder.
-2. In `BootScene.preload()`, add `this.load.image(key, url)` calls using
-   the **same texture keys** already used by `generatePlaceholderTextures`
-   (`ball`, `hole`, `coin`, `wall_0`, `mushroom_26`, …).
+1. Drop an image file into `public/assets/`.
+2. In `BootScene.preload()`, load it under a `*_raw` key (see how
+   `ball_raw`/`mushroom_raw` are loaded) and call `bakeSquareTexture` (or a
+   new sizing helper, if the shape isn't square) with the **same final
+   texture key** already used by `generatePlaceholderTextures` (`hole`,
+   `coin`, `wall_0`, …).
 3. Delete the corresponding placeholder-generation call in
    `generatePlaceholderTextures`.
 
