@@ -1,26 +1,40 @@
 // Single swap point for visuals: every sprite in the game is created from a
-// texture key (ball/hole/coin/mushroom/wall_N) generated here as a flat
-// geometric placeholder. To bring in real art later, replace the body of
-// this function with `scene.load.image(key, url)` calls in a scene's
-// preload() and keep the same keys — no changes needed in the scenes that
-// consume them (Level1Scene only ever asks for textures by key).
+// texture key (ball/hole/coin/mushroom/wall_N) — some now real art loaded in
+// BootScene.preload() (ball, mushroom_*), the rest still generated here as
+// flat geometric placeholders (hole/coin/wall_N) until real assets for them
+// are picked too. To bring in more real art later, add a
+// `scene.load.image(key, url)` call in BootScene.preload() and delete the
+// matching block below — keep the same keys so nothing else needs to
+// change (Level1Scene only ever asks for textures by key).
 import { BALL_RADIUS } from "./config.js";
+
+// Kenney Sports Pack art (loaded as "ball_raw"/"mushroom_raw" in
+// BootScene.preload()) is nowhere near the pixel size these sprites need to
+// render at (ball_golf.png is 8x8, ball_bowling2.png is 18x18). Baking each
+// raw image into a fixed-size texture under the *final* key means every
+// consuming sprite is created at GameObject scale 1, so Arcade body sizing
+// (body.setCircle(radius) in Level1Scene) works exactly like it did for the
+// vector-drawn placeholders — no physics code needs to know or care that the
+// art is scaled up from a much smaller source image.
+export function bakeRealArtTextures(scene, level) {
+  bakeSquareTexture(scene, "ball", "ball_raw", BALL_RADIUS * 2);
+  const radii = [...new Set(level.shrooms.map((m) => m.r))];
+  for (const r of radii) {
+    bakeSquareTexture(scene, `mushroom_${r}`, "mushroom_raw", r * 2);
+  }
+}
+
+function bakeSquareTexture(scene, key, rawKey, size) {
+  const temp = scene.add.image(0, 0, rawKey).setDisplaySize(size, size);
+  const rt = scene.make.renderTexture({ width: size, height: size }, false);
+  rt.draw(temp, size / 2, size / 2);
+  rt.saveTexture(key);
+  rt.destroy();
+  temp.destroy();
+}
 
 export function generatePlaceholderTextures(scene, level) {
   const g = scene.add.graphics();
-
-  // ball: flat white disc with a grey outline, plus an off-center mark so
-  // the rolling-rotation animation is actually visible on a placeholder
-  // that would otherwise look identical at every angle
-  const bd = BALL_RADIUS * 2;
-  g.clear();
-  g.fillStyle(0xffffff, 1);
-  g.fillCircle(BALL_RADIUS, BALL_RADIUS, BALL_RADIUS - 1.5);
-  g.lineStyle(2, 0xc9c9c9, 1);
-  g.strokeCircle(BALL_RADIUS, BALL_RADIUS, BALL_RADIUS - 1.5);
-  g.fillStyle(0x8a8a8a, 1);
-  g.fillCircle(BALL_RADIUS * 1.5, BALL_RADIUS, BALL_RADIUS * 0.28);
-  g.generateTexture("ball", bd, bd);
 
   // hole: flat dark disc
   const holeR = 16;
@@ -50,20 +64,6 @@ export function generatePlaceholderTextures(scene, level) {
     g.strokeRect(1.5, 1.5, w.w - 3, w.h - 3);
     g.generateTexture(`wall_${i}`, w.w, w.h);
   });
-
-  // one mushroom texture per unique radius used in the level
-  const radii = [...new Set(level.shrooms.map((m) => m.r))];
-  for (const r of radii) {
-    g.clear();
-    g.fillStyle(0xff5d5d, 1);
-    g.fillCircle(r, r, r - 1.5);
-    g.lineStyle(3, 0xb32626, 1);
-    g.strokeCircle(r, r, r - 1.5);
-    g.fillStyle(0xffffff, 1);
-    g.fillCircle(r * 0.55, r * 0.65, r * 0.2);
-    g.fillCircle(r * 1.4, r * 0.75, r * 0.16);
-    g.generateTexture(`mushroom_${r}`, r * 2, r * 2);
-  }
 
   g.destroy();
 }
