@@ -5,6 +5,10 @@ canvas engine (`../js/physics.js`, `../js/render.js`) onto Phaser 3 with
 Arcade Physics. Only level 1 ("השדה הירוק") is ported — this is not yet a
 replacement for the main game.
 
+Scene flow: `TitleScene` (name + Start button) → `BootScene` (texture setup)
+→ `Level1Scene`. The title screen is intentionally minimal — no menus or
+level select, just a Start button.
+
 ## Run it
 
 ```
